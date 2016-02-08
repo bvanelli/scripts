@@ -2,11 +2,11 @@
 
 This C library implements a bitArray and a simple Sieve of Eratosthenes to find prime numbers. Despite it's 'Ultimate' name, it's meant to be a simple to use library to generate prime number arrays and text files.
 
-For larger and faster prime number algorithms, refer to [primesieve - Fast C/C++ prime number generator](primesieve.org) also hosted at GitHub under [kimwalisch/primesieve](https://github.com/kimwalisch/primesieve).
+For larger and faster prime number algorithms, refer to [primesieve - Fast C/C++ prime number generator](http://primesieve.org) also hosted at GitHub under [kimwalisch/primesieve](https://github.com/kimwalisch/primesieve).
 
 ## Usage
 
-To use the library, simplily include the header file in your C/C++ project: ```
+To use the library, simplily include the header file in your C/C++ project:
 
 ``` #include "UPGBinary.h" ```
 
