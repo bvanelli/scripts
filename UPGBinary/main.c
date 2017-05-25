@@ -11,7 +11,7 @@ main()
 	bitArray * primes = newBitArray(1000);
 
 	primeSieve(primes);
-	//printToFile(primes, "primes.txt");
+	//printToFile(primes, "primes.txt"); // Uncomment to print file
 	freePrimeArray(primes);
 
 
@@ -22,5 +22,4 @@ main()
 
 	printf("\n\nExecution terminated in ~%.3f seconds \n\n", getCurrentTime() - timestart);
 
-	getchar();
 }

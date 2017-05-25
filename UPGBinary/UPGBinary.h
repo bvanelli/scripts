@@ -10,6 +10,10 @@
 #include <stdint.h>
 #include <time.h>
 
+// Microsoft being Microsoft
+#ifdef __unix
+#define fopen_s(fp, fmt, mode)          *(fp)=fopen( (fmt), (mode))
+#endif
 
 //  Defines 
 //
@@ -135,7 +139,7 @@ bitArray * generatePrimes(huge maxNumber)
 int printToFile(bitArray * structArray, char * filename)
 {
 	FILE * pFile;
-	errno_t err = fopen_s(&pFile, filename, "w+");
+	int err = fopen_s(&pFile, filename, "w+");
 	huge position = 1;
 
 	if (err != 0 || !structArray)

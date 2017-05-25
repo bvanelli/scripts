@@ -6,27 +6,39 @@ For larger and faster prime number algorithms, refer to [primesieve - Fast C/C++
 
 ## Usage
 
-To use the library, simplily include the header file in your C/C++ project:
+To use the library, simply include the header file in your C/C++ project:
 
-``` #include "UPGBinary.h" ```
+```c
+#include "UPGBinary.h"
+```
 
 To create a bitArray with 32*size positions, use:
 
-``` bitArray * primes = newBitArray(size); ```
+```c
+bitArray * primes = newBitArray(size);
+```
 
 To apply Sieve of Eratosthenes:
 
-``` primeSieve(primes); ```
+```c
+primeSieve(primes);
+```
 
 If you want to print all primes to a text file:
 
-``` printToFile(primes, "primes.txt"); ```
+```c
+printToFile(primes, "primes.txt");
+```
 
 Remember to free the unused memory:
 
-``` freePrimeArray(primes); ```
+```c
+freePrimeArray(primes);
+```
 
 Alternatively, you can use the 'generatePrimes' function that will generate primes below a certain threshold:
 
-``` bitArray * primes = generatePrimes(maxNumber); ```
-``` printToFile(primes, "primes.txt"); ```
+```c
+bitArray * primes = generatePrimes(maxNumber);
+printToFile(primes, "primes.txt");
+```
