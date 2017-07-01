@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 #include <math.h>
-#include <omp.h>
+//#include <omp.h>
 #include <getopt.h>
 
 
