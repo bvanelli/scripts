@@ -1,3 +1,14 @@
+/*
+ 
+ The stdafx library is supposed to be a multi-purpose library aimed at filling gaps Arduino.h itself can't handle.
+
+ It supports streaming just like C++, GPIO manipulation, a time-based memory database, PI filtered controller, sensor support and more to come.
+
+ To use it, simply include in your project root directory and include it, so it ships with your program.
+
+*/
+
+
 #ifndef stdafx_h
 #define stdafx_h
 #include "Arduino.h"
@@ -7,6 +18,10 @@
 
  Declare streaming inside Arduino, as on ARDUINO_STREAMING library, so you can use:
     Serial << "Hello World!" << endl;
+ 
+ To do that, simply define DEBUG before calling this library:
+    #define DEBUG
+    #include "stdafx.h"
  
  You can disable stdout by not defining the debug flag before calling this library.
 
@@ -129,13 +144,13 @@ class Accelerometer
  Declare LM35 Temperature Reader integrated circuit.
 
 */
-class TemperatureSensor
+class LM35
 {
     private:
         int tempPin;
     
     public:
-        TemperatureSensor (int _tempPin)
+        LM35 (int _tempPin)
         {
             tempPin = _tempPin;
         }
