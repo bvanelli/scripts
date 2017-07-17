@@ -167,12 +167,12 @@ class LM35
 
  The controller is:
 
- C = Kc (z - q)
+ C = kc (z - q)
         -------
          z - 1
 
  To create PI instance:
- cPI controller(Kc, q);
+ cPI controller(kc, q);
  
  To set the setpoint:
  controller.setpoint(SETPOINT);
@@ -183,14 +183,26 @@ class LM35
  Don't forget to delay your sampling time Ts:
  delay(Ts);
 
+ Remember to limit your output, so your control signal won't skyrocket:
+ controller.limit(min, max);
+
+ To use a filter, use the function setFilter(kf, pf). It's automatically applied to the controller. The filter equation is:
+
+ F = kf    z  
+        -------
+         z + pf
+ 
+ The filter is normally used to cancel a zero in the dynamic in the closed loop system.
+
 */
 class cPI
 {
     private:
-        float k, kc, z, u, up, e, ep, ref;
-        // Set limit
+        // Controller variables
+        float kc, z, u, up, e, ep, ref;
+        // Limit variables
         float limmin = FLT_MIN, limmax = FLT_MAX;
-        // Filter
+        // Filter variables
         float kf = 1, zf = 0, refp = 0;
         // Timed interruption
         unsigned long long tlast = 0;
@@ -233,13 +245,13 @@ class cPI
             return u;
         }
 
-        void setLimit(float _limmin, float _limmax)
+        void setLimit (float _limmin, float _limmax)
         {
             limmin = _limmin;
             limmax = _limmax;
         }
 
-        void setFilter(float _kf, float _zf)
+        void setFilter (float _kf, float _zf)
         {
             kf = _kf;
             zf = _zf;
@@ -274,7 +286,7 @@ class GPIO
             if (mode == INPUT || mode == INPUT_PULLUP || mode == OUTPUT)
             {
                 pinMode(_pin, _mode);
-                lastState = state = digitalRead(pin);
+                lastState = state = this->read();
             }
         }
 
@@ -296,8 +308,10 @@ class GPIO
 
         int read ()
         {
-            if (mode == INPUT || mode == INPUT_PULLUP)
+            if (mode == INPUT)
                 return digitalRead(pin);
+            else if (mode == INPUT_PULLUP)
+                return !digitalRead(pin);
             else
                 return analogRead(pin);
         }
@@ -323,6 +337,8 @@ class GPIO
                 digitalWrite(pin, LOW);
                 state = LOW;
             }
+            else
+                this->set(0);
         }
 
         int getState () { return state; }
