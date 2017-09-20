@@ -1,10 +1,13 @@
 /*
+
+stdafx.h - A Multipurpose library to tweak Arduino boards.
+Author: Brunno Vanelli at brunno.v@grad.ufsc.br
  
- The stdafx library is supposed to be a multi-purpose library aimed at filling gaps Arduino.h itself can't handle.
+The stdafx library is supposed to be a multi-purpose library aimed at filling gaps Arduino.h itself can't handle or did not implemented.
 
- It supports streaming just like C++, GPIO manipulation, a time-based memory database, PI filtered controller, sensor support and more to come.
+It supports streaming just like C++, GPIO manipulation, a time-based memory database, PI filtered controller, sensor support and more to come.
 
- To use it, simply include in your project root directory and include it, so it ships with your program.
+To use it, simply include in your project root directory and include it, so it ships with your program.
 
 */
 
@@ -16,14 +19,14 @@
 
 /*
 
- Declare streaming inside Arduino, as on ARDUINO_STREAMING library, so you can use:
-    Serial << "Hello World!" << endl;
- 
- To do that, simply define DEBUG before calling this library:
-    #define DEBUG
-    #include "stdafx.h"
- 
- You can disable stdout by not defining the debug flag before calling this library.
+    Declare streaming inside Arduino, as on ARDUINO_STREAMING library, so you can use:
+        Serial << "Hello World!" << endl;
+
+    To do that, simply define DEBUG before calling this library:
+        #define DEBUG
+        #include "stdafx.h"
+
+    You can disable stdout by not defining the debug flag before calling this library.
 
 */
 enum _EndLineCode { endl };
@@ -39,8 +42,8 @@ enum _EndLineCode { endl };
 
 /*
 
- Define some useful conversions for stdout, you can use:
-    Serial << _HEX(a);
+    Define some useful conversions for stdout, you can use:
+        Serial << _HEX(a);
 
 */
 #define _HEX(a)     _BASED(a, HEX)
@@ -50,7 +53,7 @@ enum _EndLineCode { endl };
 
 /*
 
- Simple memory database for recording float data/timestamp keypair.
+    Simple memory database for recording float data/timestamp keypair.
 
 */
 class Database
@@ -112,7 +115,7 @@ typedef struct
 
 /*
 
- Declare standard accelerometer interface.
+    Declare standard accelerometer interface.
 
 */
 class Accelerometer
@@ -141,7 +144,7 @@ class Accelerometer
 
 /*
 
- Declare LM35 Temperature Reader integrated circuit.
+    Declare LM35 Temperature Reader integrated circuit.
 
 */
 class LM35
@@ -163,36 +166,36 @@ class LM35
 
 /*
 
- A simple PI controller for Arduino based on discrete controller.
+    A simple PI controller for Arduino based on discrete controller.
 
- The controller is:
+    The controller is:
 
- C = kc (z - q)
+    C = kc (z - q)
         -------
          z - 1
 
- To create PI instance:
- cPI controller(kc, q);
- 
- To set the setpoint:
- controller.setpoint(SETPOINT);
+    To create PI instance:
+    cPI controller(kc, q);
 
- To calculate control signal:
- value = controller.calculate(SENSOR_READING);
+    To set the setpoint:
+    controller.setpoint(SETPOINT);
 
- Don't forget to delay your sampling time Ts:
- delay(Ts);
+    To calculate control signal:
+    value = controller.calculate(SENSOR_READING);
 
- Remember to limit your output, so your control signal won't skyrocket:
- controller.limit(min, max);
+    Don't forget to delay your sampling time Ts:
+    delay(Ts);
 
- To use a filter, use the function setFilter(kf, pf). It's automatically applied to the controller. The filter equation is:
+    Remember to limit your output, so your control signal won't skyrocket:
+    controller.limit(min, max);
 
- F = kf    z  
+    To use a filter, use the function setFilter(kf, pf). It's automatically applied to the controller. The filter equation is:
+
+    F = kf    z  
         -------
          z + pf
- 
- The filter is normally used to cancel a zero in the dynamic in the closed loop system.
+
+    The filter is normally used to cancel a zero in the dynamic in the closed loop system.
 
 */
 class cPI
@@ -266,7 +269,7 @@ class cPI
 
 /*
 
- Use this to declare custom GPIO since Arduino doesn't provide ways to detect rising/falling edges on non-interrupt pins.
+    Use this to declare custom GPIO since Arduino doesn't provide ways to detect rising/falling edges on non-interrupt pins.
 
 */
 class GPIO
@@ -345,5 +348,17 @@ class GPIO
         int getPin ()   { return pin; }
         int getMode ()  { return mode; }
 };
+
+/*
+
+    This free_ram() function takes no parameter and returns the distance between the heap and the stack.
+
+*/
+int free_ram()
+{
+	extern int __heap_start, * __brkval;
+	int v;
+	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
 
 #endif
