@@ -79,13 +79,14 @@ class Database
             delete[] t;
         }
     
-        int push (float _data, float _time)
+        uint16_t push (float _data, float _time)
         {
-            if (this->isFull())
-                return 1;
+            if (!this->hasSpace())
+                return 0;
             data[pointer] = _data;
             t[pointer] = _time;
             pointer++;
+            return pointer;
         }
 
         void free ()
@@ -98,20 +99,19 @@ class Database
             }
         }
         
-        int isFull ()       { return pointer == MAX_POINTER ? 1 : 0; }        
-        uint16_t maxSize () { return MAX_POINTER; }
-        uint16_t size ()    { return pointer; }
+        uint16_t hasSpace () { return MAX_POINTER - pointer; }        
+        uint16_t maxSize ()  { return MAX_POINTER; }
+        uint16_t size ()     { return pointer; }
         float getData (uint16_t pos)    { return data[pos]; }
         float getTime (uint16_t pos)    { return t[pos]; }
 };
 
-
-typedef struct
+class Transducer 
 {
-    float x = 0;
-    float y = 0;
-    float z = 0;
-} xyzdata;
+    void read ();
+    void actuate ();
+};
+
 
 /*
 
@@ -124,6 +124,14 @@ class Accelerometer
         int xport, yport, zport;
     
     public:
+
+        typedef struct
+        {
+            float x = 0;
+            float y = 0;
+            float z = 0;
+        } xyzdata;
+
         Accelerometer (int _x, int _y, int _z)
         {
             xport = _x;
@@ -281,12 +289,21 @@ class GPIO
         int mode;
 
     public:
-        GPIO (int _pin, int _mode)
+        
+        enum {
+            IN = INPUT,
+            OUT = OUTPUT,
+            IN_PULLUP = INPUT_PULLUP,
+            ANALOG,
+            PWM
+        };
+
+        GPIO (const int _pin, const int _mode)
         {
             pin = _pin;
             mode = _mode;
 
-            if (mode == INPUT || mode == INPUT_PULLUP || mode == OUTPUT)
+            if (mode == IN || mode == IN_PULLUP || mode == OUT)
             {
                 pinMode(_pin, _mode);
                 lastState = state = this->read();
@@ -311,26 +328,30 @@ class GPIO
 
         int read ()
         {
-            if (mode == INPUT)
+            if (mode == IN)
                 return digitalRead(pin);
-            else if (mode == INPUT_PULLUP)
+            else if (mode == IN_PULLUP)
                 return !digitalRead(pin);
-            else
+            else if (mode == ANALOG)
                 return analogRead(pin);
         }
 
         void set ()
         {
-            if (mode == OUTPUT)
+            if (mode == OUT)
             {
                 digitalWrite(pin, HIGH);
                 state = HIGH;
             }
         }
 
-        void set (int value)
+        void set (const int value)
         {
-            analogWrite(pin, value);
+            if (mode == PWM)
+            {
+                analogWrite(pin, value);
+                state = value;
+            }
         }
 
         void clear ()
