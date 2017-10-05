@@ -106,13 +106,6 @@ class Database
         float getTime (uint16_t pos)    { return t[pos]; }
 };
 
-class Transducer 
-{
-    void read ();
-    void actuate ();
-};
-
-
 /*
 
     Declare standard accelerometer interface.
