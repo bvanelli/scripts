@@ -165,6 +165,49 @@ class LM35
         }
 };
 
+
+class Signals {
+
+public:
+
+/*
+
+    FIR Filter Design on Arduino.
+
+*/
+
+class FIR
+{
+    float * h;
+    float * x;
+    unsigned int size;
+    unsigned int iteration;
+
+    public:
+        FIR(float * h, const unsigned int size)
+        {
+            this->h = new float[size];
+            memcpy(this->h, h, size*sizeof(float));
+            this->size = size;
+            this->x = new float[size];
+
+            for (unsigned int i = 0; i < size; i++)
+                this->x[i] = 0.0;
+        }
+
+        float filter(float value)
+        {
+            float ret = 0;
+            x[iteration] = value;
+           
+            for (int i=0; i<size; i++)
+                ret += h[i] * x[(i + iteration) % size];
+            
+            iteration = (iteration + 1) % size;                
+            return ret;
+        }
+};
+
 /*
 
     A simple PI controller for Arduino based on discrete controller.
@@ -266,6 +309,8 @@ class cPI
         float getError ()     { return e; }
         float getReference () { return ref; }
         float getOutput ()    { return u; }
+};
+
 };
 
 /*
