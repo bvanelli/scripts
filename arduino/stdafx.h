@@ -172,59 +172,28 @@ public:
 
 /*
 
-    FIR Filter Design on Arduino.
-    
+    IIR Filter Design on Arduino.
+
+    This filter can be written as (a0 is assumed to be 0):
+
+        y[n] = b0*x[n] + b1*x[n - 1] + ... + bP*x[n - P]
+         - a1*y[n - 1] + a2*y[n - 2] + ... + aQ*y[n - Q]
+
+    or in the z domain:
+
+        H(z) = b0 + b1*z^-1 + ... + bP*z^-P
+               -----------------------------
+                1 + a1*z^-1 + ... + aQ*z^-Q
+
     To use it, first create the filter with the desired coefficients:
 
-    const float h[] = {0.25, 0.25, 0.25, 0.25};
-    Signals::FIR f(h, sizeof(h)/sizeof(*h));
+        const float b[] = {0, 1};
+        const float a[] = {-0.5};
+        Signals::IIR f(b, sizeof(b)/sizeof(*b), a, sizeof(a)/sizeof(*a));
 
     Now filter the current ref value!
 
-    float fref = f.filter(ref);
-
-*/
-class FIR
-{
-    float * h;
-    float * x;
-    unsigned int size;
-    unsigned int iteration;
-
-    public:
-        FIR(const float * h, const unsigned int size)
-        {
-            this->h = new float[size];
-            memcpy(this->h, h, size*sizeof(float));
-            this->size = size;
-            this->x = new float[size];
-
-            for (unsigned int i = 0; i < size; i++)
-                this->x[i] = 0.0;
-        }
-
-        ~FIR()
-        {
-            delete this->h;
-            delete this->x;
-        }
-
-        float filter(const float value)
-        {
-            float ret = 0;
-            x[iteration] = value;
-           
-            for (int i=0; i<size; i++)
-                ret += h[i] * x[(i + iteration) % size];
-            
-            iteration = (iteration + 1) % size;                
-            return ret;
-        }
-};
-
-/*
-
-    IIR Filter Design on Arduino.
+        float fref = f.filter(ref);
 
 */
 class IIR
@@ -286,34 +255,58 @@ class IIR
 
 /*
 
+    FIR Filter Design on Arduino. This is a special case of the IIR filter, and is implemented as such.
+    
+    The N order filter assumes the type:
+
+        y[n] = b0*x[n] + b1*x[n - 1] + ... + bN*x[n - N]
+    
+    To use it, first create the filter with the desired coefficients:
+
+        const float h[] = {0.25, 0.25, 0.25, 0.25};
+        Signals::FIR f(h, sizeof(h)/sizeof(*h));
+
+    Now filter the current ref value!
+
+        float fref = f.filter(ref);
+
+*/
+class FIR : public IIR
+{
+    public:
+        FIR(const float * h, const unsigned int size) : IIR(h, size, {0}, 1) {} // FIXME: i left size as 0 to prevent creation of 0 size array, even though it's permitted by gcc and works fine
+};
+
+/*
+
     A simple PI controller for Arduino based on discrete controller.
 
     The controller is:
 
-    C = kc (z - q)
-        -------
-         z - 1
+        C = kc (z - q)
+            ----------
+              z - 1
 
     To create PI instance:
-    cPI controller(kc, q);
+        cPI controller(kc, q);
 
     To set the setpoint:
-    controller.setpoint(SETPOINT);
+        controller.setpoint(SETPOINT);
 
     To calculate control signal:
-    value = controller.calculate(SENSOR_READING);
+        value = controller.calculate(SENSOR_READING);
 
     Don't forget to delay your sampling time Ts:
-    delay(Ts);
+        delay(Ts);
 
     Remember to limit your output, so your control signal won't skyrocket:
-    controller.limit(min, max);
+        controller.limit(min, max);
 
     To use a filter, use the function setFilter(kf, pf). It's automatically applied to the controller. The filter equation is:
 
-    F = kf    z  
-        -------
-         z + pf
+    F = kf   z  
+          -------
+           z + pf
 
     The filter is normally used to cancel a zero in the dynamic in the closed loop system.
 
