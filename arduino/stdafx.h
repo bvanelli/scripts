@@ -173,9 +173,17 @@ public:
 /*
 
     FIR Filter Design on Arduino.
+    
+    To use it, first create the filter with the desired coefficients:
+
+    const float h[] = {0.25, 0.25, 0.25, 0.25};
+    Signals::FIR f(h, sizeof(h)/sizeof(*h));
+
+    Now filter the current ref value!
+
+    float fref = f.filter(ref);
 
 */
-
 class FIR
 {
     float * h;
@@ -184,7 +192,7 @@ class FIR
     unsigned int iteration;
 
     public:
-        FIR(float * h, const unsigned int size)
+        FIR(const float * h, const unsigned int size)
         {
             this->h = new float[size];
             memcpy(this->h, h, size*sizeof(float));
@@ -195,7 +203,13 @@ class FIR
                 this->x[i] = 0.0;
         }
 
-        float filter(float value)
+        ~FIR()
+        {
+            delete this->h;
+            delete this->x;
+        }
+
+        float filter(const float value)
         {
             float ret = 0;
             x[iteration] = value;
@@ -204,6 +218,68 @@ class FIR
                 ret += h[i] * x[(i + iteration) % size];
             
             iteration = (iteration + 1) % size;                
+            return ret;
+        }
+};
+
+/*
+
+    IIR Filter Design on Arduino.
+
+*/
+class IIR
+{
+    private:
+        float * a, * b;
+        float * x, * y;
+        unsigned int size_a, size_b;
+        unsigned int iteration_a, iteration_b;
+
+    public:
+        IIR(const float * b, const unsigned int size_b, const float * a, const unsigned int size_a)
+        {
+            // b coefficients
+            this->size_b = size_b;
+            this->b = new float[size_b];
+            memcpy(this->b, b, size_b*sizeof(float));
+            
+            this->x = new float[size_b];
+
+            for (unsigned int i = 0; i < size_b; i++)
+                this->x[i] = 0.0;
+
+            // a coefficients
+            this->size_a = size_a;
+            this->a = new float[size_a];
+            memcpy(this->a, a, size_a*sizeof(float));
+            
+            this->y = new float[size_a];
+            
+            for (unsigned int i = 0; i < size_a; i++)
+                this->y[i] = 0.0;
+        }
+
+        ~IIR()
+        {
+            delete this->a, this->b;
+            delete this->x, this->y;
+        }
+
+        float filter(const float value)
+        {
+            float ret = 0;
+            x[iteration_b] = value;
+            
+           
+            for (int i=0; i < size_b; i++)
+                ret += b[i] * x[(i + iteration_b) % size_b];
+
+            for (int i=0; i < size_a; i++)
+                ret -= a[i] * y[(i + iteration_a) % size_a];
+            
+            iteration_b = (iteration_b + 1) % size_b;
+            iteration_a = (iteration_a + 1) % size_a;
+            y[iteration_a] = ret;
             return ret;
         }
 };
@@ -304,7 +380,7 @@ class cPI
             zf = _zf;
         }
 
-        int available (unsigned long ts) { return tlast - millis() > ts ? 1 : 0; }
+        bool available (unsigned long ts) { return tlast - millis() > ts; }
         float getFilteredReference ()    { return kf*ref - zf*refp; }
         float getError ()     { return e; }
         float getReference () { return ref; }
