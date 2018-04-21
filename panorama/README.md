@@ -1,12 +1,12 @@
 # Panorama
 
-In this script we will be building a Matlab script that automatically extract features and applies homography transformations to align photos for a full sized panorama photo.
+In this script we will be building a Matlab script that automatically extract features and applies homography transformations to align photos for a full sized panorama photo. The objective here is take 5 colored photos (640x480) taken from different angles and combine them into a single panoramic photo. Because some of the regions overlap, it is possible to extract and match features between photos in order to obtain the relation they share. Using that, we will be then rotating the pictures and aligning them.
 
 The photos chosen are the following:
 
 ![full](https://user-images.githubusercontent.com/8211602/39070875-65f4f30e-44bb-11e8-9a38-cade3f527de5.png)
 
-We will be using [Peter Corke's Computer Vision toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox) to process the images. In order to properly align all the photos, we have to see where they are similar, thus, let's extract features.
+We will be using [Peter Corke's Computer Vision toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox) to process the images. In order to properly align all the photos, we have to see where they are similar, thus, let's extract features!
 
 ## Extracting features
 
@@ -62,7 +62,7 @@ The end result, pasting the second image on the first would look something like 
 
 As you can see, the warp was nearly perfect, however there are a few details to consider. First, the exposition of the images don't match, leaving a clear divisory line where the images meet. To correct that, one can use alpha blending to merge the pictures. We didn't.
 
-The final image can be seen below. Note that other than the first-to-second pair, all other pairs are misaligned. This is a issue that couldn't be solved 
+We just repeat the steps done in the last commands to all the images to obtain the full panorama. The final image can be seen below. Note that other than the first-to-second pair, all other pairs are misaligned. This is a issue that couldn't be solved because neither of the homography matrices are perfect.
 
 ![final](https://user-images.githubusercontent.com/8211602/39076662-0f594186-44d3-11e8-90b5-00f54f8af145.png)
 
@@ -80,6 +80,20 @@ As you can see, this method also misaligns the images, but it becomes less obvio
 
 ### Photoshop
 
-As expected, Photoshop renders the best results for the image merging.
+As expected, Photoshop renders the best results for the image stitching.
 
 ![photoshop](https://user-images.githubusercontent.com/8211602/39076235-8600cc6c-44d0-11e8-8310-6235464afb4b.png)
+
+## I want to run it!
+
+First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all backticks ``(`)`` with `'`). Just replace the photos on the `dataset` folder with your own. Remember they have to be in order and end with `.jpg`. Then, execute the script (tested on MATLAB 2016a):
+
+```matlab
+> trabalho1
+```
+
+
+
+## Conclusions
+
+We can conclude that, even though the result is reasonable from a academic standpoint, it's not nearly as good as the professional tools available like Photoshop.
