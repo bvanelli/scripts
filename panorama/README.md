@@ -62,9 +62,9 @@ The end result, pasting the second image on the first would look something like 
 
 As you can see, the warp was nearly perfect, however there are a few details to consider. First, the exposition of the images don't match, leaving a clear divisory line where the images meet. To correct that, one can use alpha blending to merge the pictures. We didn't.
 
-We just repeat the steps done in the last commands to all the images to obtain the full panorama. The final image can be seen below. Note that other than the first-to-second pair, all other pairs are misaligned. This is a issue that couldn't be solved because neither of the homography matrices are perfect.
+We just repeat the steps done in the last commands to all the images to obtain the full panorama. The final image can be seen below. As you can see, we still have the problem of seeing the merging lines and the perspective for the right side of the building is not great.
 
-![final](https://user-images.githubusercontent.com/8211602/39076662-0f594186-44d3-11e8-90b5-00f54f8af145.png)
+![final](https://user-images.githubusercontent.com/8211602/39097653-a45cb200-4635-11e8-8c25-11e6ef97f903.png)
 
 ## Comparisons
 
@@ -76,7 +76,7 @@ This version of panorama includes a different feature extraction method using us
 
 ![yihui-he](https://user-images.githubusercontent.com/8211602/39076234-85dca9d6-44d0-11e8-8253-29a946a74733.png)
 
-As you can see, this method also misaligns the images, but it becomes less obvious as it is blurred by the blender.
+As you can see, this method misaligns the images, but it becomes less obvious as it is blurred by the blender.
 
 ### Photoshop
 

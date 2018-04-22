@@ -1,5 +1,6 @@
 clear all
-images = iread('dataset/*.JPG','double');
+images = iread('dataset/*.JPG','double');%,'reduce',5);
+
 [~,~,~,numImages] = size(images);
 
 im2 = images(:,:,:,1);
@@ -10,11 +11,11 @@ for i = 2:(numImages)
     im2 = images(:,:,:,i);
     
     sf1 = sf2;
-    sf2 = isurf(im2);%,'nfeat', 10);
+    sf2 = isurf(im2);
     
-    m = sf1.match(sf2)%,'top',300);
+    m = sf1.match(sf2,'top',200);
     
-    H{i-1} = ransac(@homography,[m.p1; m.p2],0.5);
+    H{i-1} = ransac(@homography,[m.p1; m.p2],2);
     if(i > 2)
         H{i-1} = H{i-1} * H{i-2};
     end
@@ -25,36 +26,31 @@ for i = 1:(numImages-1)
 end
 
 im = images(:,:,:,1);
-[u,v,~] = size(im);
+[v,u,c] = size(im);
 
-[yMaxs,xMaxs] = cellfun(@size,imagesFinal);
-yMaxs = [yMaxs u];
-xMaxs = [xMaxs v];
-yFinal = max(yMaxs);
-xFinal = sum(xMaxs);
-
+[yMaxs,xMaxs, c] = cellfun(@size,imagesFinal);
 offsets = cell2mat(offs);
-xOffset = sum(offsets(1:2:end));
-yOffset = sum(offsets(2:2:end));
-yFinal = yFinal - yOffset;
 
-[u,v,c] = size(imagesFinal{end});
+limitYSuperior = max(abs(offsets(2:2:end)));
 
-panoramic0 = zeros(yFinal,offsets((numImages-1)*2 -1)+u);
+yMaxs = yMaxs + offsets(2:2:end);
+yFinal = max(yMaxs) + limitYSuperior;
+xFinal = offsets(end-1) + xMaxs(numImages-1);
 
 
-panoramic = ipaste(panoramic0,im,[1 -yOffset],'add');
+pInicialx = 1;
+pInicialy = limitYSuperior;
+panoramic0 = zeros(yFinal,xFinal);
+
+
+panoramic = ipaste(panoramic0,im,[pInicialx pInicialy],'add');
 
 for i = 1:(numImages-1)
-    panoramic = paste2(panoramic,imagesFinal{i},[offsets(i*2 -1) sum(-offsets(2:2:end)) + offsets(i*2)]);
+    panoramic = paste2(panoramic,imagesFinal{i},[(pInicialx+ offsets(i*2 -1)) (pInicialy+ offsets(i*2))]);
 end
+imshow(panoramic)
 
-[nonZeroRows, ~, ~] = find(panoramic);
-% Get the cropping parameters
-topRow = min(nonZeroRows(:));
-bottomRow = max(nonZeroRows(:));
-% Extract a cropped image from the original.
-croppedpanoramic = panoramic(topRow:bottomRow, 1:end, :);
 
-idisp(croppedpanoramic);
+
+
 
