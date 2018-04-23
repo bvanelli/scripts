@@ -62,9 +62,33 @@ The end result, pasting the second image on the first would look something like 
 
 As you can see, the warp was nearly perfect, however there are a few details to consider. First, the exposition of the images don't match, leaving a clear divisory line where the images meet. To correct that, one can use alpha blending to merge the pictures. We didn't.
 
-We just repeat the steps done in the last commands to all the images to obtain the full panorama. The final image can be seen below. As you can see, we still have the problem of seeing the merging lines and the perspective for the right side of the building is not great.
+We just repeat the steps done in the last commands to all the images to obtain the full panorama. The final image can be seen below. As you can see, we still have the problem of seeing the merging lines and the perspective for the right side of the building is not great, because we used the last camera as reference. This means the first image (farthest to the left) is kept unchanged, and all other perspectives are calculated based on the first image.
 
 ![final](https://user-images.githubusercontent.com/8211602/39097653-a45cb200-4635-11e8-8c25-11e6ef97f903.png)
+
+In order to change the perspective to the middle camera, we will have to apply a transformation to all camera matrices, so that the middle camera have a `H` matrix equivalent to the eye matrix. To do that, we just take the inverse of the middle matrix and multiply all matrices by it:
+
+```matlab
+H = [eye(3) H];
+indexCentral = ceil(numImages/2);
+inverse = inv(H{indexCentral});
+
+for i = 1:numImages
+    H{i} = H{i} * inverse;
+end
+```
+
+The result can be seen below. Notice how some misalignments are still present in the image. Also, because our approach relies on statistics for parameter estimation, it will lead to slightly different results every time the script is called.
+
+![final-central](https://user-images.githubusercontent.com/8211602/39157679-5c85e9a8-4732-11e8-9fb1-f8735a1b20f1.png)
+
+
+
+## Testing with another dataset
+
+To test the algorithm with other dataset, we chose our beautiful campus in Blumenau/SC.  The set consists of 9 pictures, with little angle variations to better suit feature matching. The results can be seen below.
+
+![final-ufsc](https://user-images.githubusercontent.com/8211602/39158320-c1bd0bd2-4735-11e8-94b9-ba342481934a.png)
 
 ## Comparisons
 
@@ -86,13 +110,17 @@ As expected, Photoshop renders the best results for the image stitching.
 
 ## I want to run it!
 
-First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all backticks ``(`)`` with `'`). Just replace the photos on the `dataset` folder with your own. Remember they have to be in order and end with `.jpg`. Then, execute the script (tested on MATLAB 2016a):
+First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all backticks ``(`)`` with `'`). Just replace the photos on the `dataset` folder with your own, or change the path in the second line of the script.
+
+```matlab
+images = iread('YOUR FOLDER HERE/*.JPG','double');
+```
+
+Consider resizing the photos to a lower resolution like 640x480 in order to speed up the process. Also, remember they have to be in order and end with `.jpg`. Then, execute the script (tested on MATLAB 2016a):
 
 ```matlab
 > trabalho1
 ```
-
-
 
 ## Conclusions
 

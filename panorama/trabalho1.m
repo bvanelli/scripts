@@ -1,6 +1,5 @@
 clear all
-images = iread('dataset/*.JPG','double');%,'reduce',5);
-
+images = iread('dataset/*.JPG','double');
 [~,~,~,numImages] = size(images);
 
 im2 = images(:,:,:,1);
@@ -13,20 +12,25 @@ for i = 2:(numImages)
     sf1 = sf2;
     sf2 = isurf(im2);
     
-    m = sf1.match(sf2,'top',200);
+    m = sf1.match(sf2,'top',500);
     
-    H{i-1} = ransac(@homography,[m.p1; m.p2],2);
+    H{i-1} = ransac(@homography,[m.p1; m.p2],0.5);
     if(i > 2)
         H{i-1} = H{i-1} * H{i-2};
     end
 end
 
-for i = 1:(numImages-1)
-    [imagesFinal{i} offs{i}] = homwarp(inv(H{i}), images(:,:,:,i+1), 'full');
+H = [eye(3) H];
+indexCentral = ceil(numImages/2);
+inversa = inv(H{indexCentral});
+
+for i = 1:numImages
+    H{i} = H{i} * inversa;
 end
 
-im = images(:,:,:,1);
-[v,u,c] = size(im);
+for i = 1:(numImages)
+    [imagesFinal{i} offs{i}] = homwarp(inv(H{i}), images(:,:,:,i), 'full');
+end
 
 [yMaxs,xMaxs, c] = cellfun(@size,imagesFinal);
 offsets = cell2mat(offs);
@@ -35,20 +39,23 @@ limitYSuperior = max(abs(offsets(2:2:end)));
 
 yMaxs = yMaxs + offsets(2:2:end);
 yFinal = max(yMaxs) + limitYSuperior;
-xFinal = offsets(end-1) + xMaxs(numImages-1);
+
+limitXEsquerda = abs(min(offsets(1:2:end)));
+[maxX, indexMaxX] = max(offsets(1:2:end));
+xFinal = limitXEsquerda + maxX + xMaxs(indexMaxX);%xMaxs(numImages-1) deveria receber o tamanho da imagem correspondente a max(offsets(1:2:end))
 
 
-pInicialx = 1;
+pInicialx = limitXEsquerda;
 pInicialy = limitYSuperior;
-panoramic0 = zeros(yFinal,xFinal);
+panoramic = zeros(yFinal,xFinal,3);
 
-
-panoramic = ipaste(panoramic0,im,[pInicialx pInicialy],'add');
-
-for i = 1:(numImages-1)
+for i = 1:numImages
     panoramic = paste2(panoramic,imagesFinal{i},[(pInicialx+ offsets(i*2 -1)) (pInicialy+ offsets(i*2))]);
 end
 imshow(panoramic)
+
+
+
 
 
 
