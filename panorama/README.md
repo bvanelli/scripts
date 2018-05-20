@@ -110,7 +110,7 @@ As expected, Photoshop renders the best results for the image stitching.
 
 ## I want to run it!
 
-First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all backticks ``(`)`` with `'`). Just replace the photos on the `dataset` folder with your own, or change the path in the second line of the script.
+First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all double-quotes `"` with single quotes `'`). Just replace the photos on the `dataset` folder with your own, or change the path in the second line of the script.
 
 ```matlab
 images = iread('YOUR FOLDER HERE/*.JPG','double');

@@ -67,3 +67,29 @@ The ZNCC is a pretty robust algorithm for template matching because it's invaria
 Using the first character of the plate used as an example, the letter B, we can obtain the results matching with all the letters available on the template. Notice that the B gives us the best result, but other round characters like D or S give high values, meaning that trying to match low quality plates (like in pictures taken from far away) might be a problem.
 
 <img src="https://user-images.githubusercontent.com/8211602/40282847-6d286e74-5c4b-11e8-84b4-ed414029d6ae.png" width="50%">
+
+## I want to run it!
+
+First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all double-quotes `"` with single quotes `'`). First, import your image using your favorite Computer Vision Toolbox in grayscale and double precision.
+
+```matlab
+plate = iread('YOUR IMAGE HERE', 'double', 'grey');
+```
+
+You also need to load the template for template matching (we include the mandatory template in the 'fonte' folder):
+
+```matlab
+template = load_font('fonte/letras.png', 'fonte/numeros.png');
+```
+
+Now, try identifying the plate:
+
+```matlab
+s1 = get_plate(plate, template)
+```
+
+Alternatively, you can identify the state-city:
+
+```matlab
+h1 = get_plate_header(plate, template)
+```
