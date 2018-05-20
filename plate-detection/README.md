@@ -4,7 +4,7 @@ The objective of this code is accurately identify a plate, segment the character
 
 <img src="https://github.com/marcelopetry/BLU3040_Visao/blob/master/A2/dataset/placa_carro1.jpg" height="120" width="260">  <img src="https://github.com/marcelopetry/BLU3040_Visao/blob/master/A2/dataset/placa_moto1.jpg" height="120" width="160">  
 
-*Figure 1. Plate models according to brazilian standards, using [Mandatory font](https://en.wikipedia.org/wiki/Mandatory_(typeface)).
+* Figure 1. Plate models according to brazilian standards, using [Mandatory font](https://en.wikipedia.org/wiki/Mandatory_(typeface)).
 
 There are two main challenges to accomplish: identifying the plate number (bigger characters) and identifying the state-city (smaller characters on top of the bigger characters). Because each of this texts will require different data processing, we divided into two different problems. There is also the problem of order regarding the motorcycle plate, that has double-line plate number, and problems regarding different color plates for especial vehicles, like official cars.
 
@@ -26,7 +26,7 @@ In order to reduce the complexity of data to process, we first apply filters aim
 
 The following image show how the image is transformed in each step. Notice that even with processing, there is remaining noise on the result. In order to enhance the detection of the plate number (big letters and numbers), we also apply an morphological opening (morphological erosion followed by dilation) that reduce the amount of little white spots. We don't apply opening on state-city identification as it could render small letters illegible.
 
-TODO: include niblack-otsu.png
+![niblack-otsu](https://user-images.githubusercontent.com/8211602/40282844-6cbef4e4-5c4b-11e8-9ada-3d4db1bd1877.png)
 
 ## Character segmentation
 
@@ -36,11 +36,11 @@ In order to find all distinct objects on the image, we used `iblobs` to get usef
 
 Blob is a reagion feature . For a binary image, the `iblobs` function return all connected groups of pixels on the image, greater than a given area. It then gives every blob a number and a father, meaning that, if a letter has a hole in it, it will be detected as a child blob of the letter. The ultimate father of all blobs is the background. The following image illustrates this idea:
 
-TODO: include blobs.png
+![blobs](https://user-images.githubusercontent.com/8211602/40282842-6c433f34-5c4b-11e8-9f46-6fe3d6344235.png)
 
 Notice that we only want the blobs that are related to the background, so we can remove all others.
 
-TODO: include blobs-nobg.png
+![blobs-nobg](https://user-images.githubusercontent.com/8211602/40282843-6c9ba890-5c4b-11e8-843c-4c56a9ad19c7.png)
 
 Finally, we apply `clusterdata`, that simply splits data in groups based on their Euclidian distance and a cutoff value. We use as a parameter to the clustering the height of the blobs, that is supposed to be constant in all characters, and pick the global maximum because the big letters will always be the largest blob.
 
@@ -50,7 +50,7 @@ The last step is actually picking the group with largest heigth and sorting the 
 
 In order to match the characters to their alphanumeric counterparts, we first loaded a template for the custom Mandatory Font.
 
-TODO: include template.png
+![template](https://user-images.githubusercontent.com/8211602/40282845-6ce2f7f4-5c4b-11e8-99ea-600148ece79f.png)
 
 In order to match the blobs to the template, we first take the character from the original image (before applying the transformations) and apply the `zncc` algorithm.
 
@@ -58,7 +58,7 @@ In order to match the blobs to the template, we first take the character from th
 
 The [ZNCC](https://en.wikipedia.org/wiki/Cross-correlation#Zero-normalized_cross-correlation_(ZNCC)), or Zero mean Normalized Cross Correlation is an algorithm based on NCC for template matching. The equation, considering an image I and a template T is as follows:
 
-TODO: include zncc.png
+![zncc](https://user-images.githubusercontent.com/8211602/40282846-6d0376be-5c4b-11e8-8b77-b3db961cfe42.png)
 
 The ZNCC is a pretty robust algorithm for template matching because it's invariant to affine changes in image brightness, offset and scale.
 
@@ -66,31 +66,4 @@ The ZNCC is a pretty robust algorithm for template matching because it's invaria
 
 Using the first character of the plate used as an example, the letter B, we can obtain the results matching with all the letters available on the template. Notice that the B gives us the best result, but other round characters like D or S give high values, meaning that trying to match low quality plates (like in pictures taken from far away) might be a problem.
 
-TODO: include zncc-out.png
-
-
-
-
-
-
-
-
-
-## Entregas
-Cada grupo deverá descrever a sua funcao sob a forma de relatório técnico. No relatório deverá ser apresentado:
-* Contextualização
-* Breve explicação sobre as metodologias utilizas
-* Descrição da lógica 
-* Testes e resultados
-* Conclusão
-
-Cada um dos grupos deverá criar um projeto público no GitHub e fazer upload do código desenvolvido. O link para o projeto do GitHub deverá constar no relatório entregue. O projeto no GitHub deverá conter um arquivo README explicando brevemente o algoritmo e como executá-lo. Cada grupo também deverá realizar uma demonstração do seu algoritmo durante a aula.
-
-
-## Avaliação
-A pontuacao do trabalho será atribuida de acordo com os criterios estabaleceidos a seguir: 
-* Até 7.0: A função recebe como argumento uma imagem, e retorna um vetor com dois elementos contendo os três caracteres alfabeticos e os quatro caracteres numericos referentes ao número da placa do veículo. O algoritmo devera reconhecer os caracteres em pelo menos 3 imagens diferentes.
-* Até 8.0: Além dos requesitos estabelecidos anteriormente, a função deverá retornar os caracteres numéricos referentes ao estado e a cidade.
-* Até 10.0: Além dos requesitos estabelecidos anteriormente, as imagens passadas para a função deverão ter outros elementos além da placa do veículo, tais como parachoque, pavimento, pessoas, etc. Esta deverá primeiramente identificar, extrair e orientar a placa. Devem ser utilizadas tecnicas de conversao do espaco de cor, operacoes monadicas e homografia.
-* Até 12.0: Além dos requesitos estabelecidos anteriormente, a função devera receber vídeo, de arquivo ou da webcam, e retornar os caracteres da placa.
-
+<img src="https://user-images.githubusercontent.com/8211602/40282847-6d286e74-5c4b-11e8-84b4-ed414029d6ae.png" width="50%">
