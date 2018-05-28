@@ -26,7 +26,7 @@ function [ res ] = load_font( letters_file, numbers_file )
     for i = 1:length(f)
         if f(i).parent == background
             box = f(i);
-            template_letters{j} = ~letras(box.vmin:box.vmax, box.umin:box.umax);
+            template_letters{j} = letras(box.vmin:box.vmax, box.umin:box.umax);
             j = j + 1;
         end
     end
@@ -45,7 +45,7 @@ function [ res ] = load_font( letters_file, numbers_file )
     for i = 1:length(f)
         if f(i).parent == background
             box = f(i);
-            template_numbers{j} = ~numeros(box.vmin:box.vmax, box.umin:box.umax);
+            template_numbers{j} = numeros(box.vmin:box.vmax, box.umin:box.umax);
             j = j + 1;
         end
     end

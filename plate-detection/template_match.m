@@ -1,4 +1,4 @@
-function [ decoded_char ] = template_match( character, template, method )
+function [ decoded_char, confidence ] = template_match( character, template, method )
 %TEMPLATE_MATCH is a function that finds the best match for the character
 %in the template using the zncc algorithm.
 %
@@ -13,6 +13,17 @@ function [ decoded_char ] = template_match( character, template, method )
     elseif strcmp(method, 'number')
         space = template.DIGITS;
         dictionary = template.Numbers;
+    elseif strcmp(method, 'both')
+        [n, cn] = template_match( character, template, 'letter' );
+        [d, cd] = template_match( character, template, 'number' );
+        if cn > cd
+            decoded_char = n;
+            confidence = cn;
+        else
+            decoded_char = d;
+            confidence = cd;
+        end
+        return
     else
         error('template_match method is not recognized. Use letter or number.');
     end
@@ -31,6 +42,7 @@ function [ decoded_char ] = template_match( character, template, method )
         else
             decoded_char = '1';
         end
+        confidence = 1;
         return;
     end
     
@@ -40,7 +52,7 @@ function [ decoded_char ] = template_match( character, template, method )
         sim(i) = zncc(scaled_image, dictionary{i});
     end
     
-    [~, letter_pos] = max(sim);
+    [confidence, letter_pos] = max(sim);
     decoded_char = space(letter_pos);
 end
 

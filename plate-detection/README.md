@@ -48,11 +48,9 @@ The last step is actually picking the group with largest heigth and sorting the 
 
 ## Template matching
 
-In order to match the characters to their alphanumeric counterparts, we first loaded a template for the custom Mandatory Font.
+In order to match the characters to their alphanumeric counterparts, we first loaded a template for the custom Mandatory Font, then matched the the blobs against the template. To do that, we first extract the character from the original image (before applying the transformations) and apply the `zncc` algorithm.
 
 ![template](https://user-images.githubusercontent.com/8211602/40282845-6ce2f7f4-5c4b-11e8-99ea-600148ece79f.png)
-
-In order to match the blobs to the template, we first take the character from the original image (before applying the transformations) and apply the `zncc` algorithm.
 
 ### ZNCC
 
@@ -64,9 +62,13 @@ The ZNCC is a pretty robust algorithm for template matching because it's invaria
 
 ### Results
 
-Using the first character of the plate used as an example, the letter B, we can obtain the results matching with all the letters available on the template. Notice that the B gives us the best result, but other round characters like D or S give high values, meaning that trying to match low quality plates (like in pictures taken from far away) might be a problem.
+Using the first character of the plate used as an example (the letter B), we can obtain the results matching with all the letters available on the template. Notice that the B gives us the best result, but other round characters like D or S also produced high values, meaning that trying to match low quality plates (like in pictures taken from far away) might be a problem. The algorithm make mistakes especially matching O's in the state-city recognition because of the low pixel count. To correct this problem we could use a dictionary of state-cities, since they are all known, and match the closest to the string.
 
 <img src="https://user-images.githubusercontent.com/8211602/40282847-6d286e74-5c4b-11e8-84b4-ed414029d6ae.png" width="50%">
+
+## Correcting perspective
+
+Realistically, most plates will not be as good as the images shown before, so we need to first recognize the location and orientation of the plate, and then extract and reorient it using homography. If you are not familiar with homography, [check this previous work on panoramas](https://github.com/bvanelli/scripts/tree/master/panorama). To identify the borders of the plate, we first use Hough transformation, find common intersections, reorient the plate and finally apply the algorithms shown above to segment and then identify characters.
 
 ## I want to run it!
 

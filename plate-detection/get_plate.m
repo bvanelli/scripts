@@ -13,15 +13,19 @@ function [ str_plate ] = get_plate(image , template)
 %       template = load_font('fonte/letras.png', 'fonte/numeros.png');
 %       get_plate(carro, template)
 
-    imPlate = (niblack(image,-.5,1) < otsu(image)/2);
+    imPlate = (niblack(image,-.5,1) < otsu(image));
+    imPlate = imbinarize(image);
+    if (sum(imPlate(:) == 0) > sum(imPlate(:) == 1))
+       imPlate = ~imPlate;
+    end
     
-    imPlate = iopen(imPlate, [1 1 1;1 1 1]);
+    imPlate = iclose(imPlate, [1 1 1;1 1 1]);
     
-    blobs = get_blobs(imPlate);
+    [blobs boxes] = get_blobs(imPlate);
 
     for i = 1:length(blobs)
-       u = size(blobs{i}.Image);
-       s(i) = u(1);%u(1)*u(2); Pega só a alura da placa
+       box = boxes{i};
+       s(i) = (box(2,2) - box(2,1));%u(1)*u(2); Pega só a altura da placa
     end
 
     groups = clusterdata(s', 2);
@@ -31,45 +35,56 @@ function [ str_plate ] = get_plate(image , template)
     idx = find(groups == gletras);
     
     plate = blobs(idx);
-    assert(length(plate) == 7, 'Size of plate is not equal to 7 characters. Something went wrong...');
+    plateBox = boxes(idx);
     
-    box_size = plate{1}.Box;
-    box_max_error = (box_size(2,2) -  box_size(2,1))*0.1;
+    if(length(plate) ~= 7)
+        str_plate = nan;
+        return;
+    end
+    %assert(length(plate) == 7, 'Size of plate is not equal to 7 characters. Something went wrong...');
+    
+    box_size = plateBox{1};
+    box_max_error = (box_size(2,2) -  box_size(2,1))*0.5;
     
     
     for i = 1:length(plate)
-       ypos(i) = plate{i}.Box(2,1);
+       box = plateBox{i};
+       ypos(i) = box(2,1);
     end
     
     % teste whether is a car or bike plate
     if(abs(ypos - ypos(1)) < box_max_error)
         % parse the car plate
         for i = 1:length(plate)
-            xpos(i) = plate{i}.Box(1,1);
+            box = plateBox{i};
+            xpos(i) = box(1,1);
         end
         [~, pos] = sort(xpos);
         for i = 1:length(plate)
-            plate_unscrambled{i} = plate{pos(i)}.Image;
+            plate_unscrambled{i} = plate{pos(i)};
         end
     else
         % parsing the bike plate
         [~, pos] = sort(ypos);
         plate = permute(plate,pos);
+        plateBox = permute(plateBox,pos);
         
         for i = 1:3
-            xpos(i) = plate{i}.Box(1,1);
+            box = plateBox{i};
+            xpos(i) = box(1,1);
         end
         [~, pos] = sort(xpos);
         for i = 1:3
-            plate_unscrambled{i} = plate{pos(i)}.Image;
+            plate_unscrambled{i} = plate{pos(i)};
         end
         
         for i = 4:7
-            xpos(i-3) = plate{i}.Box(1,1);
+            box = plateBox{i};
+            xpos(i-3) = box(1,1);
         end
         [~, pos] = sort(xpos);
         for i = 1:4
-            plate_unscrambled{i+3} = plate{pos(i) + 3}.Image;
+            plate_unscrambled{i+3} = plate{pos(i) + 3};
         end
     end
     
