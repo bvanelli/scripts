@@ -70,9 +70,43 @@ Using the first character of the plate used as an example (the letter B), we can
 
 Realistically, most plates will not be as good as the images shown before, so we need to first recognize the location and orientation of the plate, and then extract and reorient it using homography. If you are not familiar with homography, [check this previous work on panoramas](https://github.com/bvanelli/scripts/tree/master/panorama). To identify the borders of the plate, we first use Hough transformation, find common intersections, reorient the plate and finally apply the algorithms shown above to segment and then identify characters.
 
+**Disclaimer:** to preserve privacy, plate numbers were removed in the next pictures.
+
+### Binarizing the image and localizing the plate
+
+To reduce the amount of information, we first binarize the image using a neat little line.
+
+```matlab
+carro_chassi_t = iconvolve(niblack(im,-.5,1) < otsu(im),kgauss(2));
+```
+
+The result then shows clearly a black square where the plate should be:
+
+<img src="https://user-images.githubusercontent.com/8211602/40626027-6a95f496-628c-11e8-9c26-114c03b48766.png" width="50%">
+
+We then use region feature to extract the plate features.
+
+<img src="https://user-images.githubusercontent.com/8211602/40626026-6a70c02c-628c-11e8-8510-49d628f5426e.png" width="50%">
+
+### Applying Hough
+
+Now that we know where the features are, we just take the centers and place in the plane. Then, we apply Hough transform to find a line that intersect most of the points. This line should pass exactly in the center of the plate.
+
+<img src="https://user-images.githubusercontent.com/8211602/40626028-6ac462e0-628c-11e8-963a-a52d4268c64c.png" width="50%">
+
+This means the plate can now be better isolated from the background. We will use this new image and apply Hough again to find the borders of the white plate. The 4 intersections of the lines will be the 4 points we will homwarp.
+
+<img src="https://user-images.githubusercontent.com/8211602/40626029-6ae51c1a-628c-11e8-82dd-619835dfcfd3.png" width="50%">
+
+### Applying homography
+
+Now that we have the 4 points of the borders and the 4 points we want (given by [CONTRAN especifications](http://www.denatran.gov.br/download/Resolucoes/RESOLUCAO_CONTRAN_241.pdf)), we can homewarp the plate to the correct orientation.
+
+<img src="https://user-images.githubusercontent.com/8211602/40626031-6b35c8fe-628c-11e8-8db0-a48bc35f7e8c.png" height="120">  <img src="https://user-images.githubusercontent.com/8211602/40626030-6b11682e-628c-11e8-90c2-efbd49c182c9.png" height="120">  
+
 ## I want to run it!
 
-First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all double-quotes `"` with single quotes `'`). First, import your image using your favorite Computer Vision Toolbox in grayscale and double precision.
+First, [download and install the toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox#Downloading_the_Toolbox) (for no particular reason, all the strings in the toolbox use the wrong quotes that does not work in 2016b and below. If you are facing issues, search and replace all double-quotes `"` with single quotes `'`). First, import your image using your favorite Computer Vision Toolbox in gray scale and double precision.
 
 ```matlab
 plate = iread('YOUR IMAGE HERE', 'double', 'grey');
@@ -95,3 +129,9 @@ Alternatively, you can identify the state-city:
 ```matlab
 h1 = get_plate_header(plate, template)
 ```
+
+## Conclusions
+
+Much can be concluded from this experiment. First of all, detecting plates is hard! Minimal changes in the dataset, like brightness, amount of noise or even certain orientations can largely affect the results. More importantly, this algorithm cannot even be compared to commercial ones because it lacks basic precision on the full dataset.
+
+To correct this problem, mixed algorithms including neural nets could be used to improve accuracy, as proposed [here](https://arxiv.org/abs/1802.09567) and [here](https://github.com/openalpr/openalpr). 
