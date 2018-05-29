@@ -1,15 +1,25 @@
 function [ res ] = load_font( letters_file, numbers_file )
 %LOAD_FONT is a function to load fonts for template matching.
-%   In order to load your font, make an image file containing all the
-%   letters from left to right and in alphabetical order. The same goes for
-%   the numbers, starting from 0 to 9. Then, load your fonts using the
-%   images:
+%  In order to load your font, make an image file containing all the
+%  letters from left to right and in alphabetical order (A-Z). The same 
+%  goes for the numbers, starting from 0 to 9. Then, load your fonts using
+%  the images:
 %
-%     font = load_font( letters_image_path, numbers_image_image_path );
+%       font = load_font( letters_image_path, numbers_image_image_path );
 %
 %   Ex:
 %
-%     template = load_font('fonte/letras.png', 'fonte/numeros.png');
+%       template = load_font('fonte/letras.png', 'fonte/numeros.png');
+%
+%  The template return is a template containing a cell with letters, a cell
+%  with numbers and the a dictionary to map images to strings. You can
+%  access the individual properties:
+%
+%       idisp(template.Letters)
+%       idisp(template.Numbers)
+%       template.ALPHABET
+%       template.DIGITS
+%
     letras =  iread(letters_file, 'double', 'grey');
     numeros =  iread(numbers_file, 'double', 'grey');
 

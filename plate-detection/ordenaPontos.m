@@ -1,6 +1,7 @@
 function [ newPoints ] = ordenaPontos( points , segmentedImage)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%ORDENAPONTOS order points. That's it. It has no use outside
+%correct_perspective_matlab function.
+%
 
     [yMax,xMax] = size(segmentedImage);
     pointsImage = [0, xMax, xMax, 0;0, 0, yMax, yMax ];

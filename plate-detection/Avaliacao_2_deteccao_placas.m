@@ -29,7 +29,7 @@ for i = 1:length(imagefiles)
     plates{i} = correct_perspective_matlab(images{i});
 end
 
-%%
+%% try and match
 for i = 1:length(plates)
     if ~isempty(plates{i})
         if ~isnan(plates{i})

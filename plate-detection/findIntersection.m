@@ -1,6 +1,9 @@
 function [ intersection ] = findIntersection( line1, line2 )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%FINDINTERSECTION finds the intersection given two line objects line1 and
+%line2.
+%
+% The line object is a structure as defined in:
+% https://www.mathworks.com/help/images/ref/houghlines.html#buwgo_f-1-lines
 
     %line1
     x1  = [line1.point1(1,1) line1.point2(1,1)];

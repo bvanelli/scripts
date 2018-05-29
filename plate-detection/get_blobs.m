@@ -6,7 +6,7 @@ function [ blobs, boxes] = get_blobs( im )
 %
 %       plate = iread('dataset/placa_carro1.jpg', 'double', 'grey');
 %       plate = plate > 0.2;
-%       blobs = get_blobs(plate);
+%       [blobs, boxes] = get_blobs(plate);
 %       idisp(blobs);
 
     f = iblobs(im, 'area', [20 Inf], 'touch', 0);

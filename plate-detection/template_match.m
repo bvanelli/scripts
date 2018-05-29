@@ -4,9 +4,12 @@ function [ decoded_char, confidence ] = template_match( character, template, met
 %
 % Usage:
 %
-%  [ decoded_char ] = template_match( character, template, method )
+%      [char, confidence] = template_match(character, template, method);
 %
-% See also GET_PLATE.
+% The method can be either 'letter', 'number' or 'both'. The template must
+% be loaded using the load_font method.
+%
+% See also GET_PLATE, LOAD_FONT.
     if strcmp(method, 'letter')
         space = template.ALPHABET;
         dictionary = template.Letters;
