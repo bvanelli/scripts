@@ -90,20 +90,15 @@ bw(bw == 0) = nan;
 segmentedPlate = bw.*im;
 segmentedPlate(isnan(segmentedPlate)) = 1;
 
-%if(abs(strongestLine.theta) < 0.0872665)
-    %you don't need homewrap
-    %imCorrected = segmentedPlate(min(yP):max(yP),min(xP):max(xP));
-    %return;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%end
-
 sumArea = 0;
 for i = 1:length(propsInLines)
     sumArea = sumArea + propsInLines(i).Area;
 end
-%meanArea = meanArea/length(propsInLines);
 
 offsetLinha = ceil(min(yP)-maxDistU/4);
+offsetLinha(offsetLinha <= 0) = 1;
 offsetColuna = ceil(min(xP)-maxDistV/4);
+offsetColuna(offsetColuna <= 0) = 1;
 
 labelImage = bwlabel(~carro_chassi_t(offsetLinha:ceil(max(yP)+maxDistU/4),offsetColuna:ceil(max(xP)+maxDistV/4)));
 
@@ -115,14 +110,28 @@ for i = 1: length(s)
         k = k+1;
     end
 end
+maxArea = -1;
+for i = 1: length(propsPlaca)
+    maxArea(maxArea < propsPlaca(i).Area) = propsPlaca(i).Area;
+end
+for i = 1: length(propsPlaca)
+    if(propsPlaca(i).Area == maxArea)
+        propsPlaca = propsPlaca(i);
+        break;
+    end
+end
+
+
 boundingBoxs = cat(1, propsPlaca.BoundingBox);
 
 offsetLinha = offsetLinha + boundingBoxs(1,2);
 offsetColuna = offsetColuna + boundingBoxs(1,1);
 
-[H,T,R] = hough(edge(propsPlaca.ConvexImage,'Canny'));
-P  = houghpeaks(H,5,'threshold',ceil(0.1*max(H(:))));
-lines = houghlines(edge(propsPlaca.ConvexImage,'Canny'),T,R,P,'FillGap',200000,'MinLength',5);
+canny = edge(propsPlaca.ConvexImage,'Canny');
+
+[H,T,R] = hough(canny);
+P  = houghpeaks(H,5,'threshold',ceil(0.05*max(H(:))));
+lines = houghlines(canny,T,R,P,'FillGap',200000,'MinLength',5);
 
 % figure, imshow(propsPlaca.ConvexImage), hold on
 % max_len = 0;
@@ -130,11 +139,11 @@ lines = houghlines(edge(propsPlaca.ConvexImage,'Canny'),T,R,P,'FillGap',200000,'
 %    xy = [lines(k).point1; lines(k).point2];
 %    plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');
 % 
-%    % Plot beginnings and ends of lines
+%    %Plot beginnings and ends of lines
 %    plot(xy(1,1),xy(1,2),'x','LineWidth',2,'Color','yellow');
 %    plot(xy(2,1),xy(2,2),'x','LineWidth',2,'Color','red');
 % 
-%    % Determine the endpoints of the longest line segment
+%    %Determine the endpoints of the longest line segment
 %    len = norm(lines(k).point1 - lines(k).point2);
 %    if ( len > max_len)
 %       max_len = len;
@@ -142,11 +151,20 @@ lines = houghlines(edge(propsPlaca.ConvexImage,'Canny'),T,R,P,'FillGap',200000,'
 %    end
 % end
 
+testeRepetidas = [lines.theta; lines.rho];
+
+groups = kmeans(testeRepetidas', 4);
+
+for i = 1:4
+    idx = find(groups == i, 1);
+    linesNew(i) = lines(idx);
+end
+
 k = 1;
-for i = 1:length(lines)-1
-    for j = i+1:length(lines)
-        inter = findIntersection(lines(i),lines(j));
-        if(inter(1,1) < v && inter(2,1) < u)%trocar u por v?
+for i = 1:length(linesNew)-1
+    for j = i+1:length(linesNew)
+        inter = findIntersection(linesNew(i),linesNew(j));
+        if(abs(inter(1,1)) < v && abs(inter(2,1)) < u)%trocar u por v?
             intersections(:,k) = inter;
             k = k+1;
         end
@@ -171,18 +189,33 @@ bw(bw == 0) = nan;
 segmentedPlate = bw.*im;
 segmentedPlate(isnan(segmentedPlate)) = 1;
 
-p2 = [intersections(1,1), intersections(1,1)+ 742, intersections(1,1)+742, intersections(1,1); ...
-    intersections(1,2),intersections(1,2),intersections(1,2)+241,intersections(1,2)+241];
+p2 = [intersections(1,1), intersections(1,1), intersections(1,1)+742, intersections(1,1) + 742; ...
+    intersections(1,2)+241,intersections(1,2),intersections(1,2),intersections(1,2)+241];
 
 H = homography(intersections, p2);
-imCorrected = homwarp(H, segmentedPlate, 'full');
+try
+    imCorrected = homwarp(H, segmentedPlate, 'full');
+catch
+    imCorrected = nan;
+    return;
+end
 if(isnan(imCorrected))
     return;
 end
 imCorrected(isnan(imCorrected)) = 1;
 
-mask = (imCorrected ~=1);
-props = regionprops(mask, 'BoundingBox');
+mask = (imCorrected ~= 1);
+props = regionprops(mask, 'BoundingBox','Area');
+maxArea = -1;
+for i = 1: length(props)
+    maxArea(maxArea < props(i).Area) = props(i).Area;
+end
+for i = 1: length(props)
+    if(props(i).Area == maxArea)
+        props = props(i);
+        break;
+    end
+end
 imCorrected = imcrop(imCorrected, props.BoundingBox);
 
 end

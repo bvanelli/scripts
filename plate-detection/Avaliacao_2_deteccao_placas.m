@@ -30,8 +30,11 @@ for i = 1:length(imagefiles)
 end
 
 %%
-best = [4, 5, 6, 9];
-for i = best
-    code{i} = get_plate(plates{i}, template);
-    state_city{i} = get_plate_header(plates{i}, template);
+for i = 1:length(plates)
+    if ~isempty(plates{i})
+        if ~isnan(plates{i})
+            code{i} = get_plate(plates{i}, template);
+            state_city{i} = get_plate_header(plates{i}, template);
+        end
+    end
 end

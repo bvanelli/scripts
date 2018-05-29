@@ -2,7 +2,7 @@
 
 The objective of this code is accurately identify a plate, segment the characters and ultimately convert it into a readable string. In order to do that, we are using Matlab code together with Peter [Corke's Machine Vision Toolbox](http://petercorke.com/wordpress/toolboxes/machine-vision-toolbox). The example plates can be shown on Figure 1.
 
-<img src="https://github.com/marcelopetry/BLU3040_Visao/blob/master/A2/dataset/placa_carro1.jpg" height="120" width="260">  <img src="https://github.com/marcelopetry/BLU3040_Visao/blob/master/A2/dataset/placa_moto1.jpg" height="120" width="160">  
+<img src="https://user-images.githubusercontent.com/8211602/40629005-cf91d8f8-629e-11e8-86c3-3d59f698351d.jpg" height="120" width="260">  <img src="https://user-images.githubusercontent.com/8211602/40629006-cfc2b518-629e-11e8-9d6d-eaec89c42eaf.jpg" height="120" width="160">  
 
 * Figure 1. Plate models according to brazilian standards, using [Mandatory font](https://en.wikipedia.org/wiki/Mandatory_(typeface)).
 
