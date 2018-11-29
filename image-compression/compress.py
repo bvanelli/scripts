@@ -50,13 +50,13 @@ def traversePath(path, args, recursive):
 
 		if ((kind is not None) and (kind.extension in ('jpg', 'jpeg')) 
 			and not str.startswith(file, 'miniature_')):
-			compressMe(path, file, args.scale, args.quality, args.quiet)
+			compressMe(path, file, args.scale, int(args.quality), args.quiet)
 
 def main():
 	parser = argparse.ArgumentParser(description='Compress and resize images in bulk.')
 	parser.add_argument('--quiet', help='Turns off verbose mode.', action='store_false')
 	parser.add_argument('-r', '--recursive', help='Uses recursion in target folder.', action='store_true')
-	parser.add_argument('-s', '--scale', help='Scale of output image (default is 2).', default=2)
+	parser.add_argument('-s', '--scale', type=float, help='Scale of output image (default is 2).', default=2)
 	parser.add_argument('-q', '--quality', help='Quality of output image from 0 to 100 (default is 100).', type=int, default=100)
 	parser.add_argument('paths', metavar='path', type=str, nargs=1, help='Folders to compress.')
 	args = parser.parse_args()
