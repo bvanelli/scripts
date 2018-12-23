@@ -22,7 +22,7 @@ def compressMe(path, file, scale, quality, verbose=False):
 
     args = {
         'optimize': True,
-            'quality': quality
+        'quality': quality
     }
     # add exif if it exists
     if ('exif' in picture.info):
@@ -51,9 +51,14 @@ def traversePath(path, args, recursive):
     for file in files:
         kind = filetype.guess(os.path.join(path, file))
 
-        if ((kind is not None) and
-            (kind.extension in ('jpg', 'jpeg')) and not
-                str.startswith(file, 'miniature_')):
+        if (str.startswith(file, 'miniature_')):
+            continue
+
+        if (args.force and (('miniature_' + file) in files)):
+            print('Skipping file {}: it was already compressed.'.format(file))
+            continue
+
+        if ((kind is not None) and (kind.extension in ('jpg', 'jpeg'))):
             compressMe(path, file, args.scale, int(args.quality), args.quiet)
 
 
@@ -63,14 +68,16 @@ def main():
     parser.add_argument(
         '--quiet', help='Turns off verbose mode.', action='store_false')
     parser.add_argument(
+        '-f', '--force', help='Force recompression of images.', action='store_false')
+    parser.add_argument(
         '-r', '--recursive', help='Uses recursion in target folder.', action='store_true')
     parser.add_argument('-s', '--scale', type=float,
-                        help='Scale of output image (default is 2).', default=2)
+        help='Scale of output image (default is 2).', default=2)
     parser.add_argument(
         '-q', '--quality', help='Quality of output image from 0 to 100 (default is 100).', type=int, default=100)
     parser.add_argument('paths', metavar='path',
-                        type=str, nargs=1, help='Folders to compress.')
-    args = parser.parse_args()
+        type=str, nargs=1, help='Folders to compress.')
+    args = parser.parse_args(['dataset', '-f'])
 
     # finds present working dir
     dir = args.paths[0]
