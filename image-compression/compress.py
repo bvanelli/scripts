@@ -77,7 +77,7 @@ def main():
         '-q', '--quality', help='Quality of output image from 0 to 100 (default is 100).', type=int, default=100)
     parser.add_argument('paths', metavar='path',
         type=str, nargs=1, help='Folders to compress.')
-    args = parser.parse_args(['dataset', '-f'])
+    args = parser.parse_args()
 
     # finds present working dir
     dir = args.paths[0]
