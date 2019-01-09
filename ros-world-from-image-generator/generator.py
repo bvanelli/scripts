@@ -1,9 +1,5 @@
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
-
-im = cv2.imread('map.png', cv2.IMREAD_GRAYSCALE)
-height, width = im.shape
 
 class XMLWriter:
     __xml_header__ = """
@@ -48,12 +44,12 @@ class XMLWriter:
         </link>
     """
 
-    def generate_xml(self, wall_list):
+    def generate_xml(self, wall_list, scale = 0.05):
         xml = self.__xml_header__
 
         for index, wall in enumerate(wall_list):
-            dimensions = wall.dimensions()
-            centroid = wall.centroid()
+            dimensions = wall.dimensions()*scale
+            centroid = wall.centroid()*scale
             xml_wall = self.__xml_link__.format(
                 link_number = index,
                 height = 2.5,
@@ -67,56 +63,96 @@ class XMLWriter:
 
 
 class Wall:
-    def __init__(self, start, end, scale = 0.05):
-        self.start = start*scale
-        self.end = end*scale
-        self.scale = scale
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
 
     def __str__(self):
         return "Start = {0}; End={1}".format(self.start, self.end)
     
     def centroid(self):
-        return (self.start + self.end)/2.0 + 0.5*self.scale
+        return (self.start + self.end)/2.0 + 0.5
 
     def dimensions(self):
-        return (self.end - self.start) + 1.0*self.scale
+        return (self.end - self.start) + 1.0
 
-walls = list()
-# for i in range(0, height):
-#     started = False
-#     finished = False
-#     for j in range(0, width):
-#         if (im[i, j] == 0 and started == False):
-#             start = np.array([i, j])
-#             started = True
+    def length(self):
+        return np.sum(self.dimensions()) - 1.0
 
-#         if ((im[i,j] == 255 and started == True) or (j == width - 1 and finished == False)):
-#             end = np.array([i, j - 1])
-#             finished = True
+    def contains(self, wall):
+        dimension = self.dimensions()
+        x = np.linspace(self.start[0], self.end[0], num=dimension[0])
+        y = np.linspace(self.start[1], self.end[1], num=dimension[1])
+        
+        if (wall.start[0] in x and wall.start[1] in y and
+            wall.end[0] in x and wall.end[1] in y):
+            return True
 
-#         if (started and finished):
-#             walls.append(Wall(start, end))
-#             started = False
-#             finished = False
+        return False
 
-for j in range(0, width):
-    started = False
-    finished = False
+def isWallinList(walls, new_wall):
+    for wall in walls:
+        if (wall.contains(new_wall)):
+            return True
+    return False
+
+def main():
+    im = cv2.imread('map.png', cv2.IMREAD_GRAYSCALE)
+    height, width = im.shape
+
+    walls = list()
+
+    # generate the all the walls in the width direction
     for i in range(0, height):
-        if (im[i, j] == 0 and started == False):
-            start = np.array([i, j])
-            started = True
+        started = False
+        finished = False
+        for j in range(0, width):
+            if (im[i, j] == 0 and started == False):
+                start = np.array([i, j])
+                started = True
 
-        if ((im[i,j] == 255 and started == True) or (i == height - 1 and finished == False)):
-            end = np.array([i - 1, j])
-            finished = True
+            if ((im[i,j] == 255 and started == True) or (j == width - 1 and finished == False)):
+                end = np.array([i, j - 1])
+                finished = True
 
-        if (started and finished):
-            walls.append(Wall(start, end))
-            started = False
-            finished = False
+            if (started and finished):
+                walls.append(Wall(start, end))
+                started = False
+                finished = False
 
-xml = XMLWriter().generate_xml(walls)
+    # generate the all the walls in the height direction
+    for j in range(0, width):
+        started = False
+        finished = False
+        for i in range(0, height):
+            if (im[i, j] == 0 and started == False):
+                start = np.array([i, j])
+                started = True
 
-with open('model.sdf', 'w') as f:
-    f.write(xml)
+            if ((im[i,j] == 255 and started == True) or (i == height - 1 and finished == False)):
+                end = np.array([i - 1, j])
+                finished = True
+
+            if (started and finished):
+                started = False
+                finished = False
+                new_wall = Wall(start, end)
+                walls.append(new_wall)
+
+    # sort walls by lenght because bigger ones are likely to contain smaller ones
+    walls.sort(key=lambda x: x.length(), reverse=True)
+
+    # filter all walls that are contained (inside of) by longer walls
+    walls_filtered = list()
+    for element in walls:
+        if not isWallinList(walls_filtered, element):
+            walls_filtered.append(element)
+
+    # finally generate the model file
+    xml = XMLWriter().generate_xml(walls_filtered)
+
+    with open('model.sdf', 'w') as f:
+        f.write(xml)
+
+if __name__ == "__main__":
+    main()
