@@ -48,7 +48,7 @@ class XMLWriter:
         </link>
     """
 
-    def generate_xml(self, wall_list, scale=0.05, wall=2.5):
+    def generate_xml(self, wall_list, scale=0.05, wall_height=2.5):
         xml = self.__xml_header__
 
         for index, wall in enumerate(wall_list):
@@ -56,7 +56,7 @@ class XMLWriter:
             centroid = wall.centroid()*scale
             xml_wall = self.__xml_link__.format(
                 link_number=index,
-                height=wall,
+                height=wall_height,
                 size='{} {}'.format(dimensions[0], dimensions[1]),
                 position='{} {}'.format(centroid[0], centroid[1]),
                 orientation=0)
@@ -102,7 +102,8 @@ def isWallinList(walls, new_wall):
     return False
 
 def main(file, output, resolution, wall):
-    im = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
+    im_raw = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
+    ret, im = cv2.threshold(im_raw,254,255,cv2.THRESH_BINARY)
     height, width = im.shape
 
     walls = list()
