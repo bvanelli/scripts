@@ -1,5 +1,9 @@
+#!/usr/bin/env python3
+
 import numpy as np
+import argparse
 import cv2
+import time
 
 class XMLWriter:
     __xml_header__ = """
@@ -44,18 +48,18 @@ class XMLWriter:
         </link>
     """
 
-    def generate_xml(self, wall_list, scale = 0.05):
+    def generate_xml(self, wall_list, scale=0.05, wall=2.5):
         xml = self.__xml_header__
 
         for index, wall in enumerate(wall_list):
             dimensions = wall.dimensions()*scale
             centroid = wall.centroid()*scale
             xml_wall = self.__xml_link__.format(
-                link_number = index,
-                height = 2.5,
-                size = '{} {}'.format(dimensions[0], dimensions[1]),
-                position = '{} {}'.format(centroid[0], centroid[1]),
-                orientation = 0)
+                link_number=index,
+                height=wall,
+                size='{} {}'.format(dimensions[0], dimensions[1]),
+                position='{} {}'.format(centroid[0], centroid[1]),
+                orientation=0)
             xml = xml + xml_wall
 
         xml = xml + self.__xml_footer__
@@ -69,7 +73,7 @@ class Wall:
 
     def __str__(self):
         return "Start = {0}; End={1}".format(self.start, self.end)
-    
+
     def centroid(self):
         return (self.start + self.end)/2.0 + 0.5
 
@@ -83,12 +87,13 @@ class Wall:
         dimension = self.dimensions()
         x = np.linspace(self.start[0], self.end[0], num=dimension[0])
         y = np.linspace(self.start[1], self.end[1], num=dimension[1])
-        
+
         if (wall.start[0] in x and wall.start[1] in y and
             wall.end[0] in x and wall.end[1] in y):
             return True
 
         return False
+
 
 def isWallinList(walls, new_wall):
     for wall in walls:
@@ -96,8 +101,8 @@ def isWallinList(walls, new_wall):
             return True
     return False
 
-def main():
-    im = cv2.imread('map.png', cv2.IMREAD_GRAYSCALE)
+def main(file, output, resolution, wall):
+    im = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
     height, width = im.shape
 
     walls = list()
@@ -111,7 +116,7 @@ def main():
                 start = np.array([i, j])
                 started = True
 
-            if ((im[i,j] == 255 and started == True) or (j == width - 1 and finished == False)):
+            if ((im[i, j] == 255 and started == True) or (j == width - 1 and finished == False)):
                 end = np.array([i, j - 1])
                 finished = True
 
@@ -129,7 +134,7 @@ def main():
                 start = np.array([i, j])
                 started = True
 
-            if ((im[i,j] == 255 and started == True) or (i == height - 1 and finished == False)):
+            if ((im[i, j] == 255 and started == True) or (i == height - 1 and finished == False)):
                 end = np.array([i - 1, j])
                 finished = True
 
@@ -149,10 +154,28 @@ def main():
             walls_filtered.append(element)
 
     # finally generate the model file
-    xml = XMLWriter().generate_xml(walls_filtered)
+    xml = XMLWriter().generate_xml(walls_filtered, resolution, wall)
 
-    with open('model.sdf', 'w') as f:
+    with open(output, 'w') as f:
         f.write(xml)
 
+
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(
+        description='Generate a SDF model from an image provided by the user. '
+            'The only constraint for the image provided is having black pixels where walls should be. ' 
+            'Everything else will be treated as empty space.')
+    parser.add_argument('file', metavar='file', type=str, nargs=1, help='Your image file path.')
+    parser.add_argument('-o', '--output', type=str, help='The output map name (default is model.sdf).', default='model.sdf')
+    parser.add_argument('-r', '--resolution', type=float, help='Resolution (m/pixels) of map (default is 0.05).', default=0.05)
+    parser.add_argument('-w', '--wall', type=float, help='Wall height of reconstruction (m) (default is 2.5).', default=2.5)
+    args = parser.parse_args()
+
+    print("Started generating map")
+
+    start = time.time()
+    main(args.file[0], args.output, args.resolution, args.wall)
+    end = time.time()
+
+    print("Done in {} seconds".format(end - start))
