@@ -103,7 +103,7 @@ def isWallinList(walls, new_wall):
 
 def main(file, output, resolution, wall):
     im_raw = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
-    ret, im = cv2.threshold(im_raw,254,255,cv2.THRESH_BINARY)
+    ret, im = cv2.threshold(im_raw,1,255,cv2.THRESH_BINARY)
     height, width = im.shape
 
     walls = list()
