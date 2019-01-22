@@ -29,10 +29,13 @@ def test_match():
     points_model = read_image(im_model)
     points = read_image(im)
 
-    np.random.shuffle(points)
-    points = points[0:points_model.shape[0],:]
+    np.random.shuffle(points_model)
+    extension = points.shape[0] - points_model.shape[0]
+    points_model_upsampled = np.append(points_model, points_model[0:extension, :], axis=0)    
+    #np.random.shuffle(points)
+    #points = points[0:points_model.shape[0],:]
 
-    T, distances, iterations = icp.icp(points, points_model, tolerance=0.0001)
+    T, distances, iterations = icp.icp(points, points_model_upsampled, tolerance=0.0001)
 
     # Make C a homogeneous representation of B
     points_transformed = np.ones((points.shape[0], 4))
