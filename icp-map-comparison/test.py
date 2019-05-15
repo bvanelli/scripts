@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import numpy as np
 import cv2
 import time
@@ -16,7 +18,7 @@ def read_image(im):
             if im[i, j] == 0:
                 points[count, :] =  np.array([i, j, 0])
                 count = count + 1
-    
+
     return points
 
 def test_match():
@@ -31,7 +33,7 @@ def test_match():
 
     np.random.shuffle(points_model)
     extension = points.shape[0] - points_model.shape[0]
-    points_model_upsampled = np.append(points_model, points_model[0:extension, :], axis=0)    
+    points_model_upsampled = np.append(points_model, points_model[0:extension, :], axis=0)
     #np.random.shuffle(points)
     #points = points[0:points_model.shape[0],:]
 
@@ -50,11 +52,11 @@ def test_match():
 
     print(iterations)
 
-    plt.plot(points_model[:, 0], points_model[:, 1], 'ro', 
+    plt.plot(points_model[:, 0], points_model[:, 1], 'ro',
              points_transformed[:, 0], points_transformed[:, 1], 'bo')
     plt.axis('equal')
     plt.show()
-    
+
 
 if __name__ == "__main__":
     test_match()
